@@ -168,13 +168,13 @@ public class HelloFunctional {
 ---
 
 ## Checklist Keberhasilan
-- [ ] Lingkungan kerja sudah siap (JDK, IDE, Git, PostgreSQL, JavaFX).  
-- [ ] Repositori Git sudah dibuat dan commit awal berhasil (`week1-setup-hello-pos`).  
-- [ ] Program "Hello POS World" berjalan di tiga paradigma dan menampilkan NIM serta nama mahasiswa.  
-- [ ] Versi OOP dan fungsional menggunakan minimal tiga objek/entri produk.  
-- [ ] Tangkapan layar hasil eksekusi ketiga program telah disertakan.  
-- [ ] Laporan singkat telah dilampirkan.  
-- [ ] Perbedaan paradigma sudah dipahami dan dijelaskan pada laporan.  
+- [x] Lingkungan kerja sudah siap (JDK, IDE, Git, PostgreSQL, JavaFX).  
+- [x] Repositori Git sudah dibuat dan commit awal berhasil (`week1-setup-hello-pos`).  
+- [x] Program "Hello POS World" berjalan di tiga paradigma dan menampilkan NIM serta nama mahasiswa.  
+- [x] Versi OOP dan fungsional menggunakan minimal tiga objek/entri produk.  
+- [x] Tangkapan layar hasil eksekusi ketiga program telah disertakan.  
+- [x] Laporan singkat telah dilampirkan.  
+- [x] Perbedaan paradigma sudah dipahami dan dijelaskan pada laporan.  
 
 ---
 
