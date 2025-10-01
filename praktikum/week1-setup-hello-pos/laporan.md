@@ -116,9 +116,9 @@ public class HelloFunctional {
 ---
 
 ## Hasil Eksekusi
-![Screenshot hasil Functional](screenshots/hasilFunctional.png)
-![Screenshot hasil OOP](screenshots/hasilOOP.png)
-![Screenshot hasil Prosedural](screenshots/hasilProsedural.png)
+![Screenshot hasil Functional](Screenshots/hasilFunctional.png)
+![Screenshot hasil OOP](Screenshots/hasilOOP.png)
+![Screenshot hasil Prosedural](Screenshots/hasilProsedural.png)
 
 ---
 
