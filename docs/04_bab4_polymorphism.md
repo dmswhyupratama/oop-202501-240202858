@@ -156,11 +156,11 @@ public class MainPolymorphism {
 ---
 
 ## Checklist Keberhasilan
-- [ ] Overloading `tambahStok` berhasil.  
-- [ ] Overriding `getInfo` pada subclass berjalan.  
-- [ ] Dynamic binding berjalan melalui array produk.  
-- [ ] Output menampilkan identitas mahasiswa.  
-- [ ] Screenshot & laporan disertakan.  
+- [x] Overloading `tambahStok` berhasil.  
+- [x] Overriding `getInfo` pada subclass berjalan.  
+- [x] Dynamic binding berjalan melalui array produk.  
+- [x] Output menampilkan identitas mahasiswa.  
+- [x] Screenshot & laporan disertakan.  
 
 ---
 
