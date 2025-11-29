@@ -223,12 +223,12 @@ public class MainAbstraction {
 ---
 
 ## Checklist Keberhasilan
-- [ ] Abstract class `Pembayaran` memiliki **method abstrak** dan **method konkrit** yang tepat.
-- [ ] Interface diimplementasikan **dengan benar** pada kelas yang relevan.
-- [ ] **Multiple inheritance via interface** berjalan (kelas mengimplementasikan ≥2 interface).
-- [ ] Program menampilkan **struk** dan status proses pembayaran.
-- [ ] Output menyertakan **credit by: [NIM] - [Nama]** melalui `CreditBy`.
-- [ ] Screenshot & laporan telah dilampirkan.
+- [x] Abstract class `Pembayaran` memiliki **method abstrak** dan **method konkrit** yang tepat.
+- [x] Interface diimplementasikan **dengan benar** pada kelas yang relevan.
+- [x] **Multiple inheritance via interface** berjalan (kelas mengimplementasikan ≥2 interface).
+- [x] Program menampilkan **struk** dan status proses pembayaran.
+- [x] Output menyertakan **credit by: [NIM] - [Nama]** melalui `CreditBy`.
+- [x] Screenshot & laporan telah dilampirkan.
 
 ---
 
