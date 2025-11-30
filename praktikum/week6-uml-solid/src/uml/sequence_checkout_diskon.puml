@@ -1,0 +1,65 @@
+@startuml
+actor Kasir as K
+
+participant "Kasir UI" as UI
+participant "CheckoutController" as CC
+participant "CartService" as Cart
+participant "StockService" as Stock
+participant "DiscountService" as DiscSvc
+participant "DiscountStrategy" as Strategy
+participant "PaymentService" as PaySvc
+participant "EWalletGateway" as EWallet
+participant "ReceiptService" as Receipt
+
+== Scan dan Tambah Produk ==
+K -> UI: Scan/Pilih Produk
+UI -> CC: addItem(productId, qty)
+CC -> Stock: checkStock(productId, qty)
+Stock --> CC: stok OK
+CC -> Cart: add(productId, qty)
+Cart --> CC: itemAdded
+
+== Checkout ==
+K -> UI: Klik Checkout
+UI -> CC: startCheckout()
+CC -> Cart: getCartItems()
+Cart --> CC: items[]
+
+CC -> Stock: validateStock(items)
+Stock --> CC: stok valid
+
+== Hitung Subtotal ==
+CC -> Cart: calculateSubtotal()
+Cart --> CC: subtotal
+
+== Terapkan Diskon (Opsional) ==
+K -> UI: Input kode diskon
+UI -> CC: applyDiscount(code)
+
+CC -> DiscSvc: validateDiscount(code)
+DiscSvc -> Strategy: apply(subtotal)
+Strategy --> DiscSvc: discountAmount
+DiscSvc --> CC: totalAfterDiscount
+
+== Pilih Metode Pembayaran ==
+K -> UI: Pilih metode pembayaran
+UI -> CC: processPayment(method, amount)
+
+alt Pembayaran E-Wallet
+  CC -> PaySvc: payWithEWallet(amount)
+  PaySvc -> EWallet: charge(amount)
+  EWallet --> PaySvc: success
+  PaySvc --> CC: paymentSuccess
+else Pembayaran Tunai
+  CC -> PaySvc: payCash(amount)
+  PaySvc --> CC: paymentSuccess
+end
+
+== Generate Struk ==
+CC -> Receipt: generateReceipt(items, total)
+Receipt --> CC: receiptData
+CC -> UI: tampilkan struk
+
+K <- UI: Print Struk
+
+@enduml

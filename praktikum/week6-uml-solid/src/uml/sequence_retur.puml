@@ -1,0 +1,79 @@
+@startuml
+actor Kasir as K
+
+participant "Kasir UI" as UI
+participant "ReturController" as RC
+participant "TransactionRepository" as TR
+participant "ReturnService" as RetSvc
+participant "PaymentRefundService" as RefundSvc
+participant "EWalletGateway" as EWallet
+participant "StockService" as Stock
+participant "ReceiptService" as Receipt
+
+== Input Transaksi ==
+K -> UI: Input nomor transaksi
+UI -> RC: findTransaction(transId)
+
+RC -> TR: getTransaction(transId)
+TR --> RC: transaction / null
+
+alt Transaksi Tidak Ada
+    RC -> UI: error "Transaksi tidak ditemukan"
+    UI --> K: proses dihentikan
+    return
+end
+
+== Pilih Item Retur ==
+K -> UI: Pilih item retur + jumlah
+UI -> RC: returRequest(item, qty)
+
+RC -> RetSvc: validateReturn(transaction, item, qty)
+alt Jumlah Retur Tidak Valid
+    RetSvc --> RC: invalid
+    RC -> UI: error "Jumlah retur tidak valid"
+    UI --> K: proses dihentikan
+    return
+else Valid
+    RetSvc --> RC: valid
+end
+
+== Hitung Refund ==
+RC -> RetSvc: calculateRefund(transaction, item, qty)
+RetSvc --> RC: refundAmount
+
+== Proses Refund ==
+alt Metode E-Wallet
+    RC -> RefundSvc: refundEWallet(refundAmount)
+    RefundSvc -> EWallet: refund(refundAmount)
+
+    alt Refund berhasil
+        EWallet --> RefundSvc: success
+        RefundSvc --> RC: refundSuccess
+    else Refund gagal
+        EWallet --> RefundSvc: failed
+        RefundSvc --> RC: refundFailed
+        RC -> UI: error "Refund gagal"
+        UI --> K: proses dihentikan
+        return
+    end
+
+else Pembayaran Tunai
+    RC -> RefundSvc: refundCash(refundAmount)
+    RefundSvc --> RC: refundSuccess
+end
+
+== Update Stok ==
+RC -> Stock: increaseStock(item, qty)
+Stock --> RC: updated
+
+== Simpan Log Retur ==
+RC -> RetSvc: saveReturnRecord(...)
+RetSvc --> RC: saved
+
+== Generate Struk Retur ==
+RC -> Receipt: generateReturnReceipt(...)
+Receipt --> RC: returnReceipt
+RC -> UI: tampilkan struk retur
+UI --> K: Print struk retur
+
+@enduml

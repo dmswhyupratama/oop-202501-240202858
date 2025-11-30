@@ -1,0 +1,78 @@
+@startuml
+|Kasir|
+start
+:Mulai proses Checkout;
+:Scan/pilih produk;
+:Tambah produk ke keranjang;
+:Tampilkan total sementara;
+
+repeat
+  :Tambah produk lain?;
+repeat while (Ya)
+  
+:Klik "Checkout";
+
+|Sistem|
+:Validasi stok untuk setiap item;
+if (Stok cukup?) then (Ya)
+  :Hitung total awal (subtotal);
+else (Tidak)
+  :Tampilkan error "Stok tidak cukup";
+  |Kasir|
+  :Perbaiki keranjang atau batalkan transaksi;
+  stop
+endif
+
+|Kasir|
+:Pilih opsi "Terapkan Diskon" (opsional);
+
+|Sistem|
+if (Diskon diterapkan?) then (Ya)
+  :Validasi jenis & syarat diskon;
+  if (Diskon valid?) then (Ya)
+     :Hitung total setelah diskon;
+  else (Tidak)
+     :Tampilkan error "Diskon tidak valid";
+     |Kasir|
+     :Masukkan ulang kode diskon atau lanjut tanpa diskon;
+  endif
+else (Tidak)
+  :Lanjut tanpa diskon;
+endif
+
+|Kasir|
+:Pilih metode pembayaran;
+
+|Sistem|
+if (Metode = E-Wallet?) then (Ya)
+  |Kasir|
+  :Input nomor/ID E-Wallet;
+
+  |Sistem|
+  :Kirim request pembayaran;
+  if (Saldo cukup?) then (Ya)
+    :Konfirmasi pembayaran berhasil;
+  else (Tidak)
+    :Tampilkan error "Saldo tidak cukup";
+    |Kasir|
+    :Pilih metode pembayaran lain;
+    stop
+  endif
+
+else (Tunai)
+  |Kasir|
+  :Input jumlah uang diterima;
+  |Sistem|
+  :Hitung kembalian;
+endif
+
+|Sistem|
+:Update stok produk;
+:Simpan transaksi ke database;
+:Generate struk;
+
+|Kasir|
+:Print struk;
+:Beri ke pelanggan;
+stop
+@enduml

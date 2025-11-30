@@ -1,0 +1,58 @@
+@startuml
+|Kasir|
+start
+:Mulai proses Retur;
+:Input kode transaksi / scan struk pelanggan;
+
+|Sistem|
+:Validasi nomor transaksi;
+if (Transaksi ditemukan?) then (Ya)
+  :Ambil detail transaksi;
+else (Tidak)
+  :Tampilkan error "Transaksi tidak ditemukan";
+  |Kasir|
+  :Minta input ulang atau batalkan proses;
+  stop
+endif
+
+|Kasir|
+:Pilih item yang ingin diretur;
+:Input jumlah barang yang diretur;
+
+|Sistem|
+:Validasi jumlah retur <= jumlah beli;
+if (Valid?) then (Ya)
+  :Hitung nilai refund;
+else (Tidak)
+  :Tampilkan error "Jumlah retur tidak valid";
+  |Kasir|
+  :Perbaiki input retur;
+  stop
+endif
+
+|Kasir|
+:Konfirmasi proses retur;
+
+|Sistem|
+if (Metode pembayaran awal = Tunai?) then (Tunai)
+  :Siapkan nilai refund tunai;
+else (E-Wallet)
+  :Kirim request refund ke API E-Wallet;
+  if (Refund berhasil?) then (Ya)
+    :Konfirmasi refund sukses;
+  else (Tidak)
+    :Tampilkan error "Refund gagal dari E-Wallet";
+    |Kasir|
+    :Pilih metode refund alternatif;
+    stop
+  endif
+endif
+
+:Update stok (barang kembali ke inventori);
+:Catat retur & refund ke database;
+
+|Kasir|
+:Print struk retur;
+:Beri refund ke pelanggan;
+stop
+@enduml

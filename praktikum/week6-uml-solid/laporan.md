@@ -42,10 +42,19 @@ System.out.println(p1.getNama());
 )
 ---
 
-## Hasil Eksekusi
-(Sertakan screenshot hasil eksekusi program.  
-![Screenshot hasil](screenshots/hasil.png)
-)
+# Hasil Eksekusi
+Use Case:
+![Screenshot hasil](docs/uml_usecase.png)
+Activity Checkout & Diskon:
+![Screenshot hasil](docs/uml_activity_checkout_diskon.png)
+Activity Return Barang:
+![Screenshot hasil](docs/uml_activity_retur.png)
+Sequence Checkout & Diskon:
+![Screenshot hasil](docs/uml_sequence_checkout_diskon.png)
+Sequence Return Barang:
+![Screenshot hasil](docs/uml_sequence_retur.png)
+Class :
+![Screenshot hasil](docs/uml_class.png)
 ---
 
 ## Analisis

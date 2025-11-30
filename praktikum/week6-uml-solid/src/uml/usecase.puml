@@ -1,0 +1,88 @@
+@startuml
+left to right direction
+
+actor Kasir
+actor Admin
+
+' ============================================================
+'  BOUNDARY LAYER (UI)
+' ============================================================
+rectangle "POS User Interface (Boundary)" as UI {
+
+  (UI Login) as UILogin
+  (UI Lihat Produk) as UIProduk
+  (UI Keranjang) as UIKeranjang
+  (UI Checkout) as UICheckout
+  (UI Pembayaran) as UIPayment
+  (UI Terapkan Diskon) as UIDiskon
+  (UI Cetak Struk) as UIStruk
+  (UI Retur Barang) as UIRetur
+  (UI Laporan) as UILaporan
+}
+
+' ============================================================
+'  SYSTEM LAYER (DOMAIN / CONTROL)
+' ============================================================
+rectangle "Agri-POS System (Domain/Control)" as SYS {
+
+  (Login)
+  (Lihat Produk)
+  (Tambah ke Keranjang)
+  (Checkout)
+  (Validasi Stok)
+  (Terapkan Diskon)
+  (Bayar)
+  (Pembayaran Tunai)
+  (Pembayaran E-Wallet)
+  (Cetak Struk)
+  (Retur Barang)
+  (Validasi Transaksi)
+  (Refund Pembayaran)
+  (Kelola Produk)
+  (Lihat Laporan)
+}
+
+' ============================================================
+'  CONNECTIONS — ACTOR TO UI
+' ============================================================
+Kasir --> UILogin
+Kasir --> UIProduk
+Kasir --> UIKeranjang
+Kasir --> UICheckout
+Kasir --> UIPayment
+Kasir --> UIDiskon
+Kasir --> UIStruk
+Kasir --> UIRetur
+
+Admin --> UILogin
+Admin --> UIProduk
+Admin --> UILaporan
+
+' ============================================================
+'  CONNECTIONS — UI TO SYSTEM USE CASE
+' ============================================================
+UILogin --> (Login)
+
+UIProduk --> (Lihat Produk)
+UIKeranjang --> (Tambah ke Keranjang)
+
+UICheckout --> (Checkout)
+UICheckout --> (Validasi Stok)
+UICheckout --> (Terapkan Diskon)
+
+UIDiskon --> (Terapkan Diskon)
+
+UIPayment --> (Bayar)
+(Bayar) --> (Pembayaran Tunai) : <<extend>>
+(Bayar) --> (Pembayaran E-Wallet) : <<extend>>
+
+UIStruk --> (Cetak Struk)
+
+UIRetur --> (Retur Barang)
+(Retur Barang) --> (Validasi Transaksi) : <<include>>
+(Retur Barang) --> (Refund Pembayaran) : <<include>>
+
+UIProduk --> (Kelola Produk)
+UILaporan --> (Lihat Laporan)
+
+@enduml
