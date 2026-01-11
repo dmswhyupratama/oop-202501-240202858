@@ -209,9 +209,9 @@ week7-collections: [fitur] [deskripsi singkat]
 
 ## Checklist Keberhasilan
 
-- [ ] Program keranjang belanja menggunakan ArrayList berjalan benar
-- [ ] Program alternatif menggunakan Map berjalan benar (OPSIONAL)
-- [ ] Screenshot hasil eksekusi tersedia (`screenshots/hasil.png`)
-- [ ] Laporan minggu ke-7 lengkap (`laporan_week7.md`)
-- [ ] Struktur paket dan folder sesuai template
-- [ ] Commit & push sesuai format
+- [X] Program keranjang belanja menggunakan ArrayList berjalan benar
+- [X] Program alternatif menggunakan Map berjalan benar (OPSIONAL)
+- [X] Screenshot hasil eksekusi tersedia (`screenshots/hasil.png`)
+- [X] Laporan minggu ke-7 lengkap (`laporan_week7.md`)
+- [X] Struktur paket dan folder sesuai template
+- [X] Commit & push sesuai format
