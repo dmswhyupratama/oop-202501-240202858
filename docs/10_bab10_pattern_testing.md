@@ -229,9 +229,9 @@ Pengumpulan wajib menyertakan:
 
 ## Checklist Keberhasilan
 
-- [ ] Singleton Pattern diimplementasikan dengan benar
-- [ ] Struktur MVC jelas dan konsisten
-- [ ] Unit test JUnit berjalan tanpa error
-- [ ] Screenshot hasil test tersedia (`screenshots/junit_result.png`)
-- [ ] Laporan Week 10 lengkap (`laporan_week10.md`)
-- [ ] Commit dan push sesuai instruksi
+- [x] Singleton Pattern diimplementasikan dengan benar
+- [x] Struktur MVC jelas dan konsisten
+- [x] Unit test JUnit berjalan tanpa error
+- [x] Screenshot hasil test tersedia (`screenshots/junit_result.png`)
+- [x] Laporan Week 10 lengkap (`laporan_week10.md`)
+- [x] Commit dan push sesuai instruksi
