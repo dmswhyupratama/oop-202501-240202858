@@ -1,0 +1,83 @@
+@startuml
+autonumber
+actor "Admin" as User
+participant "MainView" as View
+participant "Controller" as Ctrl
+participant "Service" as Svc
+participant "DAO" as Dao
+database "Database" as DB
+
+User -> View : Login & Buka Dashboard
+
+alt #LightBlue Pilihan Menu: Kelola Produk (CRUD)
+    
+    note right of User
+      Skenario: Admin Menambah Produk Baru
+    end note
+    
+    User -> View : Input Data & Klik "Simpan"
+    activate View
+    View -> Ctrl : handleSaveProduct()
+    activate Ctrl
+    
+    Ctrl -> Svc : saveProduct(data)
+    activate Svc
+    
+    Svc -> Dao : findByCode(code)
+    activate Dao
+    Dao --> Svc : null (Unique)
+    deactivate Dao
+    
+    Svc -> Dao : insert(product)
+    activate Dao
+    Dao -> DB : INSERT INTO products...
+    activate DB
+    DB --> Dao : Success
+    deactivate DB
+    Dao --> Svc : Success
+    deactivate Dao
+    
+    Svc --> Ctrl : Success
+    deactivate Svc
+    
+    Ctrl -> View : showMessage("Data Tersimpan")
+    Ctrl -> View : refreshTable()
+    deactivate Ctrl
+    deactivate View
+
+else #LightYellow Pilihan Menu: Laporan Penjualan
+
+    note right of User
+      Skenario: Admin Melihat Laporan
+    end note
+
+    User -> View : Klik Menu "Laporan"
+    activate View
+    View -> Ctrl : showReportPage()
+    activate Ctrl
+    
+    Ctrl -> Svc : getDailyReport()
+    activate Svc
+    
+    Svc -> Dao : findAllTransactions()
+    activate Dao
+    Dao -> DB : SELECT * FROM transactions...
+    activate DB
+    DB --> Dao : ResultSet
+    deactivate DB
+    Dao --> Svc : List<Transaction>
+    deactivate Dao
+    
+    Svc -> Svc : calculateTotal(list)
+    note right: Business Logic:\nHitung Total Omzet
+    
+    Svc --> Ctrl : ReportModel
+    deactivate Svc
+    
+    Ctrl -> View : renderChart(data)
+    deactivate Ctrl
+    deactivate View
+
+end
+
+@enduml

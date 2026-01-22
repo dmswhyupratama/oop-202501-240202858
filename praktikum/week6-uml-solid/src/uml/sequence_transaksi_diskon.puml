@@ -1,0 +1,109 @@
+@startuml
+autonumber
+actor "Kasir" as User
+participant "TransactionView" as View
+participant "TransactionController" as Ctrl
+participant "CartService" as Svc
+participant "DiscountStrategy" as DiscStrategy
+participant "PaymentStrategy" as PayStrategy
+participant "TransactionDAO" as Dao
+database "Database" as DB
+
+title Sequence Diagram: Transaksi dengan Strategi Diskon
+
+' --- BAGIAN 1: INPUT ITEM (Singkat) ---
+User -> View : Input Produk & Qty
+activate View
+View -> Ctrl : handleAddToCart(code, qty)
+activate Ctrl
+    Ctrl -> Svc : addToCart(code, qty)
+    activate Svc
+    Svc --> Ctrl : update cart
+    deactivate Svc
+Ctrl -> View : refreshCartTable()
+deactivate Ctrl
+
+' --- BAGIAN 2: PENERAPAN DISKON (INTI) ---
+User -> View : Input Voucher (Opsional) & Klik "Hitung Total"
+activate Ctrl
+View -> Ctrl : calculateTotal(voucherCode)
+
+    ' Logika Pemilihan Strategi Diskon
+    alt voucherCode != null (Pakai Voucher)
+        Ctrl -> Svc : setDiscountStrategy(new VoucherDiscount(code))
+        activate Svc
+        Svc --> Ctrl : void
+        deactivate Svc
+    else voucherCode == null (Otomatis/Threshold)
+        Ctrl -> Svc : setDiscountStrategy(new ThresholdDiscount())
+        activate Svc
+        Svc --> Ctrl : void
+        deactivate Svc
+    end
+
+    ' Eksekusi Strategi (Polymorphism)
+    Ctrl -> Svc : calculateFinalTotal()
+    activate Svc
+    
+        Svc -> Svc : getSubtotal()
+        
+        ' Panggil Interface Strategy
+        Svc -> DiscStrategy : calculateDiscount(subtotal)
+        activate DiscStrategy
+        
+        note right of DiscStrategy
+           Di sini logika diskon berjalan
+           tanpa diketahui oleh CartService
+           (Separation of Concerns)
+        end note
+        
+        DiscStrategy --> Svc : discountAmount
+        deactivate DiscStrategy
+        
+        Svc -> Svc : finalTotal = subtotal - discountAmount
+        
+    Svc --> Ctrl : finalTotal
+    deactivate Svc
+
+    Ctrl -> View : showTotal(finalTotal)
+    Ctrl -> View : showDiscountInfo()
+    deactivate Ctrl
+
+' --- BAGIAN 3: PEMBAYARAN (CHECKOUT) ---
+User -> View : Pilih Metode Bayar & Klik "Checkout"
+activate Ctrl
+View -> Ctrl : handleCheckout(amount, methodType)
+
+    ' Pilih Strategi Pembayaran
+    alt method == CASH
+        Ctrl -> Svc : checkout(new CashPayment())
+    else method == E-WALLET
+        Ctrl -> Svc : checkout(new EWalletPayment())
+    end
+    
+    activate Svc
+        ' Eksekusi Bayar
+        Svc -> PayStrategy : pay(amount)
+        activate PayStrategy
+        PayStrategy --> Svc : true (Success)
+        deactivate PayStrategy
+        
+        ' Simpan ke Database
+        Svc -> Dao : save(transaction)
+        activate Dao
+        Dao -> DB : INSERT Header & Detail
+        activate DB
+        DB --> Dao : Success
+        deactivate DB
+        Dao --> Svc : Success
+        deactivate Dao
+        
+    Svc --> Ctrl : Success
+    deactivate Svc
+
+    Ctrl -> View : printReceipt()
+    Ctrl -> View : clearCart()
+
+deactivate Ctrl
+deactivate View
+@enduml

@@ -1,0 +1,96 @@
+@startuml
+title Activity Diagram: Dashboard Kasir (Transaksi, Diskon & Retur)
+
+|Kasir|
+start
+:Login & Buka Menu Kasir;
+
+if (Pilih Aktivitas?) then (Transaksi Penjualan)
+    
+    ' --- FLOW TRANSAKSI ---
+    :Buka Halaman Transaksi;
+    
+    repeat
+        :Input/Scan Kode Produk;
+        :Input Jumlah (Qty);
+        
+        |Sistem|
+        :Cek Stok Produk;
+        if (Stok Cukup?) then (Ya)
+            :Tambahkan ke Keranjang;
+            :Update Subtotal;
+        else (Tidak)
+            :Tampilkan Alert "Stok Kurang";
+        endif
+    
+    |Kasir|
+    repeat while (Tambah Item Lain?) is (Ya)
+    
+    ' --- FLOW DISKON ---
+    if (Ada Voucher/Member?) then (Ya)
+        :Input Kode Voucher;
+        |Sistem|
+        :Validasi Kode;
+        if (Valid?) then (Ya)
+            :Hitung Potongan Harga;
+            :Update Total Bayar;
+        else (Tidak)
+            :Tampilkan Error Voucher;
+        endif
+    else (Tidak)
+        |Sistem|
+        :Cek Diskon Otomatis (Threshold);
+    endif
+    
+    ' --- FLOW PEMBAYARAN ---
+    |Kasir|
+    :Klik Bayar;
+    if (Metode Bayar?) then (Tunai)
+        :Input Uang Tunai;
+        |Sistem|
+        :Hitung Kembalian;
+    else (E-Wallet)
+        :Scan QRIS;
+        |Sistem|
+        :Validasi Saldo API;
+    endif
+    
+    |Sistem|
+    :Simpan Transaksi;
+    :Kurangi Stok;
+    :Cetak Struk;
+    
+    |Kasir|
+    :Serahkan Struk & Barang;
+
+else (Retur Barang)
+    
+    ' --- FLOW RETUR BARANG (BARU) ---
+    |Kasir|
+    :Buka Menu Retur;
+    :Input Nomor Struk Lama;
+    :Klik Cari;
+    
+    |Sistem|
+    :Cari Data Transaksi (History);
+    
+    if (Data Ditemukan?) then (Ya)
+        |Kasir|
+        :Pilih Produk yang Diretur;
+        :Input Jumlah & Alasan;
+        :Klik "Proses Retur";
+        
+        |Sistem|
+        :Simpan Log Retur;
+        :Update Stok Barang (+Qty);
+        :Tampilkan "Retur Berhasil";
+    else (Tidak)
+        |Sistem|
+        :Tampilkan Error "Struk Tidak Valid";
+        stop
+    endif
+
+endif
+
+stop
+@enduml

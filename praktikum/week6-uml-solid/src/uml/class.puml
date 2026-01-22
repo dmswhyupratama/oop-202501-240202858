@@ -1,170 +1,87 @@
 @startuml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
-' ======================
-'   Aktor / User
-' ======================
-class User {
-  - id: int
-  - username: String
-  - password: String
-  - role: UserRole
+package "com.upb.agripos" {
+
+    package "model" {
+        class Product {
+            - code : String
+            - name : String
+            - price : double
+            - stock : int
+        }
+
+        class Cart {
+            - items : List<CartItem>
+            + addItem()
+            + clear()
+        }
+        
+        class Transaction {
+            - id : String
+            - date : LocalDateTime
+            - total : double
+            - items : List<TransactionDetail>
+        }
+    }
+
+    package "dao" {
+        interface ProductDAO {
+            + updateStock(String, int) : void
+            + findByCode(String) : Product
+            + findAll() : List<Product>
+        }
+
+        interface TransactionDAO {
+            + save(Transaction) : void
+            + findById(String) : Transaction
+            + saveReturnLog(String, String, int) : void
+        }
+    }
+
+    package "service" {
+        ' Mengurus Logika Belanja Saat Ini
+        class CartService {
+            - cart : Cart
+            - discountStrategy : DiscountStrategy
+            + addToCart(Product, qty)
+            + checkout(PaymentStrategy)
+        }
+
+        ' REVISI: Mengurus Data Historis & Retur
+        class TransactionService {
+            - transDao : TransactionDAO
+            - prodDao : ProductDAO
+            + findTransactionById(String) : Transaction
+            + processReturn(String, String, int) : void
+        }
+    }
+
+    package "controller" {
+        class TransactionController {
+            - cartService : CartService
+            - transService : TransactionService
+            + handleCheckout()
+            + handleReturn() ' <-- Fitur Baru
+        }
+    }
+    
+    package "strategy" {
+        interface PaymentStrategy
+        interface DiscountStrategy
+    }
 }
 
-enum UserRole {
-  ADMIN
-  KASIR
-}
+' Relations
+TransactionController --> CartService
+TransactionController --> TransactionService
 
-' ======================
-'   Produk & Inventory
-' ======================
-class Product {
-  - code: String
-  - name: String
-  - category: String
-  - price: double
-  - stock: int
-}
+CartService --> TransactionDAO : save transaction
+TransactionService --> TransactionDAO : read/update
+TransactionService --> ProductDAO : restock item
 
-class StockService {
-  + increaseStock(product: Product, qty: int)
-  + decreaseStock(product: Product, qty: int)
-}
+ProductDAO ..> Product
+TransactionDAO ..> Transaction
 
-' ======================
-'   Keranjang & Transaksi
-' ======================
-class CartItem {
-  - product: Product
-  - qty: int
-  + getSubtotal(): double
-}
-
-class Cart {
-  - items: List<CartItem>
-  + addItem(product: Product, qty: int)
-  + removeItem(product: Product)
-  + getTotal(): double
-}
-
-class Transaction {
-  - id: int
-  - items: List<CartItem>
-  - total: double
-  - paymentMethod: PaymentMethod
-}
-
-enum PaymentMethod {
-  CASH
-  EWALLET
-}
-
-class TransactionRepository {
-  + save(transaction: Transaction)
-  + findById(id: int): Transaction
-}
-
-' ======================
-'   DISCOUNT (Strategy)
-' ======================
-
-interface DiscountStrategy {
-  + apply(total: double): double
-}
-
-class NoDiscount {
-  + apply(total: double): double
-}
-
-class PercentageDiscount {
-  - percent: double
-  + apply(total: double): double
-}
-
-class FixedDiscount {
-  - amount: double
-  + apply(total: double): double
-}
-
-DiscountStrategy <|.. NoDiscount
-DiscountStrategy <|.. PercentageDiscount
-DiscountStrategy <|.. FixedDiscount
-
-' ======================
-'   Payment Services
-' ======================
-class PaymentService {
-  + payCash(total: double): boolean
-  + payEWallet(total: double): boolean
-}
-
-class EWalletGateway {
-  + pay(amount: double): boolean
-  + refund(amount: double): boolean
-}
-
-PaymentService --> EWalletGateway
-
-' ======================
-'   RETUR / REFUND
-' ======================
-
-class ReturnRecord {
-  - id: int
-  - transaction: Transaction
-  - item: CartItem
-  - qty: int
-  - refundAmount: double
-}
-
-class ReturnService {
-  + validateReturn(transaction: Transaction, item: CartItem, qty: int): boolean
-  + calculateRefund(transaction: Transaction, item: CartItem, qty: int): double
-  + saveReturnRecord(record: ReturnRecord)
-}
-
-class PaymentRefundService {
-  + refundCash(amount: double): boolean
-  + refundEWallet(amount: double): boolean
-}
-
-PaymentRefundService --> EWalletGateway
-
-ReturnService --> ReturnRecord
-ReturnService --> Transaction
-ReturnService --> CartItem
-
-' ======================
-'   Struk & Output
-' ======================
-class ReceiptService {
-  + generateReceipt(transaction: Transaction)
-  + generateReturnReceipt(record: ReturnRecord)
-}
-
-' ======================
-'   Controller Layer
-' ======================
-class CheckoutController {
-  + applyDiscount(strategy: DiscountStrategy)
-  + checkout(cart: Cart, paymentMethod: PaymentMethod)
-}
-
-class ReturController {
-  + findTransaction(id: int)
-  + returItem(transaction: Transaction, item: CartItem, qty: int)
-  + processRefund(amount: double, method: PaymentMethod)
-}
-
-CheckoutController --> DiscountStrategy
-CheckoutController --> PaymentService
-CheckoutController --> ReceiptService
-CheckoutController --> TransactionRepository
-
-ReturController --> ReturnService
-ReturController --> PaymentRefundService
-ReturController --> StockService
-ReturController --> ReceiptService
-ReturController --> TransactionRepository
 @enduml

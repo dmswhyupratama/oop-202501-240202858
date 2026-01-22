@@ -1,0 +1,75 @@
+@startuml
+title Activity Diagram: Admin Dashboard (Produk & Laporan)
+
+|Admin|
+start
+:Login & Buka Dashboard Admin;
+
+if (Pilih Menu?) then (Menu Kelola Produk)
+    
+    ' --- MULAI BLOK CRUD ---
+    if (Aksi Produk?) then (Tambah)
+        :Klik Tambah;
+        :Input Data;
+        :Klik Simpan;
+        |Sistem|
+        :Validasi Input;
+        if (Valid & Unik?) then (Ya)
+            :Insert ke Database;
+            :Tampilkan Sukses;
+        else (Tidak)
+            :Tampilkan Error;
+            stop
+        endif
+        
+    elseif (Edit) then (Ya)
+        |Admin|
+        :Pilih Produk;
+        :Edit Data;
+        :Klik Update;
+        |Sistem|
+        :Validasi Input;
+        if (Valid?) then (Ya)
+            :Update Database;
+            :Tampilkan Sukses;
+        else (Tidak)
+            :Tampilkan Error;
+            stop
+        endif
+        
+    else (Hapus)
+        |Admin|
+        :Pilih Produk;
+        :Klik Hapus;
+        |Sistem|
+        :Konfirmasi?;
+        if (Yakin?) then (Ya)
+            :Delete dari Database;
+            :Tampilkan Sukses;
+        else (Batal)
+            stop
+        endif
+    endif
+    
+    ' --- TITIK TEMU CRUD ---
+    |Sistem|
+    :Refresh Tabel Produk;
+    ' --- SELESAI BLOK CRUD ---
+
+else (Menu Laporan Penjualan)
+    
+    ' --- MULAI BLOK LAPORAN ---
+    |Sistem|
+    :Ambil Data Transaksi (Database);
+    :Hitung Total Pendapatan;
+    :Tampilkan Tabel Laporan;
+    :Tampilkan Total Omzet;
+    
+    |Admin|
+    :Melihat / Cetak Laporan;
+    ' --- SELESAI BLOK LAPORAN ---
+    
+endif
+
+stop
+@enduml

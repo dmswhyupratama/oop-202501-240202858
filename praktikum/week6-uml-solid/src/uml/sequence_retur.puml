@@ -1,79 +1,76 @@
 @startuml
-actor Kasir as K
+autonumber
+actor "Kasir" as User
+participant "ReturnView" as View
+participant "TransactionController" as Ctrl
+participant "TransactionService" as Svc
+participant "TransactionDAO" as TransDao
+participant "ProductDAO" as ProdDao
+database "Database" as DB
 
-participant "Kasir UI" as UI
-participant "ReturController" as RC
-participant "TransactionRepository" as TR
-participant "ReturnService" as RetSvc
-participant "PaymentRefundService" as RefundSvc
-participant "EWalletGateway" as EWallet
-participant "StockService" as Stock
-participant "ReceiptService" as Receipt
+title Sequence Diagram: Proses Retur Barang
 
-== Input Transaksi ==
-K -> UI: Input nomor transaksi
-UI -> RC: findTransaction(transId)
+' --- STEP 1: CARI DATA TRANSAKSI ---
+User -> View : Input No. Struk / ID Transaksi
+activate View
+View -> Ctrl : searchTransaction(transId)
+activate Ctrl
 
-RC -> TR: getTransaction(transId)
-TR --> RC: transaction / null
+    Ctrl -> Svc : findTransactionById(transId)
+    activate Svc
+    
+    Svc -> TransDao : findById(transId)
+    activate TransDao
+    TransDao -> DB : SELECT * FROM transactions WHERE id = ?
+    activate DB
+    DB --> TransDao : Result Set
+    deactivate DB
+    TransDao --> Svc : Transaction Data
+    deactivate TransDao
+    
+    Svc --> Ctrl : Transaction Data
+    deactivate Svc
 
-alt Transaksi Tidak Ada
-    RC -> UI: error "Transaksi tidak ditemukan"
-    UI --> K: proses dihentikan
-    return
-end
+    Ctrl -> View : showTransactionDetails(data)
+    deactivate Ctrl
 
-== Pilih Item Retur ==
-K -> UI: Pilih item retur + jumlah
-UI -> RC: returRequest(item, qty)
+' --- STEP 2: PROSES RETUR ---
+User -> View : Pilih Item & Klik "Proses Retur"
+activate Ctrl
+View -> Ctrl : handleReturn(transId, productCode, qty)
 
-RC -> RetSvc: validateReturn(transaction, item, qty)
-alt Jumlah Retur Tidak Valid
-    RetSvc --> RC: invalid
-    RC -> UI: error "Jumlah retur tidak valid"
-    UI --> K: proses dihentikan
-    return
-else Valid
-    RetSvc --> RC: valid
-end
+    Ctrl -> Svc : processReturn(transId, productCode, qty)
+    activate Svc
+    
+    ' 1. Update Status Transaksi (misal: dicatat di tabel retur)
+    Svc -> TransDao : saveReturnLog(transId, productCode, qty)
+    activate TransDao
+    TransDao -> DB : INSERT INTO returns ...
+    activate DB
+    DB --> TransDao : Success
+    deactivate DB
+    deactivate TransDao
+    
+    ' 2. Kembalikan Stok Barang (Restock)
+    Svc -> ProdDao : findByCode(productCode)
+    activate ProdDao
+    ProdDao --> Svc : Product Data
+    deactivate ProdDao
+    
+    Svc -> ProdDao : updateStock(code, currentStock + qty)
+    activate ProdDao
+    ProdDao -> DB : UPDATE products SET stock = stock + ?
+    activate DB
+    DB --> ProdDao : Success
+    deactivate DB
+    deactivate ProdDao
+    
+    Svc --> Ctrl : Success
+    deactivate Svc
 
-== Hitung Refund ==
-RC -> RetSvc: calculateRefund(transaction, item, qty)
-RetSvc --> RC: refundAmount
+    Ctrl -> View : showMessage("Retur Berhasil")
+    Ctrl -> View : clearForm()
 
-== Proses Refund ==
-alt Metode E-Wallet
-    RC -> RefundSvc: refundEWallet(refundAmount)
-    RefundSvc -> EWallet: refund(refundAmount)
-
-    alt Refund berhasil
-        EWallet --> RefundSvc: success
-        RefundSvc --> RC: refundSuccess
-    else Refund gagal
-        EWallet --> RefundSvc: failed
-        RefundSvc --> RC: refundFailed
-        RC -> UI: error "Refund gagal"
-        UI --> K: proses dihentikan
-        return
-    end
-
-else Pembayaran Tunai
-    RC -> RefundSvc: refundCash(refundAmount)
-    RefundSvc --> RC: refundSuccess
-end
-
-== Update Stok ==
-RC -> Stock: increaseStock(item, qty)
-Stock --> RC: updated
-
-== Simpan Log Retur ==
-RC -> RetSvc: saveReturnRecord(...)
-RetSvc --> RC: saved
-
-== Generate Struk Retur ==
-RC -> Receipt: generateReturnReceipt(...)
-Receipt --> RC: returnReceipt
-RC -> UI: tampilkan struk retur
-UI --> K: Print struk retur
-
+deactivate Ctrl
+deactivate View
 @enduml
